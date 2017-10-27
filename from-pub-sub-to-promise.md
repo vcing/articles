@@ -21,7 +21,7 @@
 
 那么现在，让我们先暂且放下种种边界情况，异常处理，假设只有resolve这一条路(pending -> fulfilled)，这个时候Promise还剩下什么。
 
-```
+`
 function Promise(fn) {
     var state = 'pending',
         value = null,
@@ -66,12 +66,14 @@ function Promise(fn) {
     }
     fn(resolve);
 }
-```
+`
 
-这段代码来自[Promise原理解析](https://github.com/mengera88)。这也是我目前看过的最精良的Promise核心实现了。
+在这就不来一步一步的实现了，直接上代码。这段代码来自[Promise原理解析](https://github.com/mengera88)。这也是我目前看过的最精良的Promise核心实现了。
 
+粗略的看一眼，一共50行代码，Promise内主要分成了三个函数 `than`, `handle` 和 `resolve`。不管你一眼看没看懂，反正我是花了2天时间去充分理解他们的细节，内部关系，还有意图。当然，这其中包含了远远不止三对的发布/订阅模式关系。接下来，我们以函数为单位逐个浅析一下他们各自的功能。
 
 # 2 对比剖析
+## 2.0 场景和术语定义
 ## 2.1 then-订阅事件
 ## 2.2 resolve-发布事件
 ## 2.3 Promise本体-调度中心
