@@ -21,6 +21,55 @@
 
 那么现在，让我们先暂且放下种种边界情况，异常处理，假设只有resolve这一条路(pending -> fulfilled)，这个时候Promise还剩下什么。
 
+```
+function Promise(fn) {
+    var state = 'pending',
+        value = null,
+        callbacks = [];
+    this.then = function (onFulfilled) {
+        return new Promise(function (resolve) {
+            handle({
+                onFulfilled: onFulfilled || null,
+                resolve: resolve
+            });
+        });
+    };
+    function handle(callback) {
+        if (state === 'pending') {
+            callbacks.push(callback);
+            return;
+        }
+        //如果then中没有传递任何东西
+        if(!callback.onFulfilled) {
+            callback.resolve(value);
+            return;
+        }
+        var ret = callback.onFulfilled(value);
+        callback.resolve(ret);
+    }
+    
+    function resolve(newValue) {
+        if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+            var then = newValue.then;
+            if (typeof then === 'function') {
+                then.call(newValue, resolve);
+                return;
+            }
+        }
+        state = 'fulfilled';
+        value = newValue;
+        setTimeout(function () {
+            callbacks.forEach(function (callback) {
+                handle(callback);
+            });
+        }, 0);
+    }
+    fn(resolve);
+}
+```
+
+这段代码来自[Promise原理解析](https://github.com/mengera88)。这也是我目前看过的最精良的Promise核心实现了。
+
 
 # 2 对比剖析
 ## 2.1 then-订阅事件
