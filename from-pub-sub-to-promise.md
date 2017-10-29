@@ -11,7 +11,7 @@
 
 通常来说，发布/订阅模式具有两个非常实用的特点-异步和解耦
 1. 异步:在我完成了订阅之后我就可以安心的睡觉了，不需要时刻盯着老师或者不停的问同桌老师来了没。
-2. 解耦:无论我是否真的睡着了还是在下面偷偷玩手机，同桌并不关系我在做什么，而我也不管同桌是真的在听课还是也在看小说。只要他能准确的提醒我老师来了，那么我就是安全的。
+2. 解耦:实际上，当我睡觉的时候，我并不是监听的同桌的声音或者动作。我只需要监听‘老师来了’这句话。最终唤醒我的也是这句话而不是我的同桌。一句话可能有点抽象，那如果是老师来了的时候请扔个橡皮擦过来。这个时候橡皮差就替代了‘老师来了’这句话，我只需要盯着同桌的橡皮擦什么时候飞过来，而不需要盯着同桌。所以我和我的同桌之间也就自然不存在耦合关系了。
 
 ## 1.2 Promise/A+规范核心
 
@@ -74,6 +74,37 @@ function Promise(fn) {
 
 # 2 对比剖析
 ## 2.0 场景和术语定义
+在正式进入剖析之前，让我们先来定义一个简单的使用场景，然后对部分场景中的对象进行一个抽象画的命名方便理解。
+### 场景
+依旧以老师来了为例，同桌`deskmate`对象上有一个函数`teacherWarning`，调用该函数会返回一个`Promise`对象，当老师来了的时候`Promise`对象的状态将变成`fulfilled`，并且调用注册在该`Promise`上的回调方法。
+···
+function Me() {
+    this.name = 'Li Lei'
+}
+
+Me.prototype.wakeUp = function() {
+ // 赶紧坐起来 翻开书 开启学霸模式
+ ...
+}
+
+function Classmate() {
+    this.name = 'Han Mei Mei'
+}
+
+Classmate.prototype.teachWarning = function() {
+    return new Promise((resolve) => {
+        // 同桌会每秒钟观察一下老师的位置
+        setInterval(() => {
+            if(this.teach.position - this.position < 5)
+                resolve()
+        },1000)
+    })
+}
+
+let me = new Me()
+let deskmate = new Classmate()
+deskmate.teacherWarning().then(me.wakeUp)
+···
 ## 2.1 then-订阅事件
 ## 2.2 resolve-发布事件
 ## 2.3 Promise本体-调度中心
