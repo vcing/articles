@@ -21,7 +21,7 @@
 
 那么现在，让我们先暂且放下种种边界情况，异常处理，假设只有resolve这一条路(pending -> fulfilled)，这个时候Promise还剩下什么。
 
-`
+```
 function Promise(fn) {
     var state = 'pending',
         value = null,
@@ -66,7 +66,7 @@ function Promise(fn) {
     }
     fn(resolve);
 }
-`
+```
 
 在这就不来一步一步的实现了，直接上代码。这段代码来自[Promise原理解析](https://github.com/mengera88)。这也是我目前看过的最精良的Promise核心实现了。
 
