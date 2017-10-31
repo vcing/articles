@@ -138,19 +138,7 @@ promise.then(me.wakeUp)
 
     在[订阅者](#订阅者)通过`then`函数订阅该事件时传入的函数参数，标准Promise规范中为两个函数参数，第一个为事件完成时(fulfilled)执行的回调函数，第二个为事件拒绝时(rejected)执行的回调函数。本文简化后只保留`onFulfilled`函数。对应1.3中`than`函数的形参`onFulfilled`和1.4场景中的`me.wakeUp`作为实参。
 
-- #### 外部Promise
-
-    执行`teachWarning()`返回的`Promise`对象，因为是执行后直接返回的，即不属于[订阅者](#订阅者)也不属于[发布者](#发布者)，并且在Promise链式调用和内部Promise递归中也属于最外层，所以暂且先这么称呼它。
-
-- #### 链式Promise第n层
-
-    Promise的链式调用中第n个`then()`函数返回的promise对象。所以外部Promise也可以叫做[链式Promise第0层](#链式Promise第n层)。
-
-- #### 递归Promise第n层
-
-    在[发布函数](#发布函数)执行[内部回调函数](#内部回调函数)`resolve`所带的参数，如果该参数为一个[thenable对象](#thenable对象)，那么我将称他为[递归Promise第n层](#递归Promise第n层)。所以如果[外部Promise](#外部Promise)第一次执行内部回调函数`resolve`时所接收到的参数为一个[thenable对象](#thenable对象)，它便称为[递归Promise第1层](#递归Promise第0层]。因为这其中确实是会将Promise的`then`方法递归调用
-
-有代码格式的单词`word`指代这个单词在1.3或1.4场景代码中的本体位置，非代码格式的单词word指代这个单词所指的名词概念或和前后字符所组成的名词概念。
+有代码格式的单词`word`指代这个单词在代码中的本体位置，非代码格式的单词word指代这个单词所指的名词概念或和前后字符所组成的名词概念。
 
 当我编完这些术语的时候真的感觉挺绕的，但是仔细想想，这里面有很多东西真的是跳不过去的。并且相比之后在文章中需要用大量文字去指代某一个概念或者变量，不如在这里先定义了，就像我们在写程序中定义常量那样。在这里先不用急着去理解或者记住每个术语，后文中出现这些术语的地方我将用链接的形式把这些术语标记出来并链接到对应的定义的位置。
 
@@ -160,6 +148,22 @@ promise.then(me.wakeUp)
 
 # 2 对比剖析
 ## 2.1 then-订阅事件
+
+    作为Promise对象暴露出来的唯一函数，then函数的意义也就非常明确了-注册回调。让我们先把这段代码单独拎出来看看：
+```
+this.then = function (onFulfilled) {
+    return new Promise(function (resolve) {
+        handle({
+            onFulfilled: onFulfilled || null,
+            resolve: resolve
+        });
+    });
+};
+```
+跟我们平时写的注册回调不一样，因为要支持链式调用，所以`then`函数必须返回一个`Promise`对象。此时，`then`函数返回的`Promise`的(内部回调函数)[#内部回调函数]`resolve`和调用`then`注册上来的`onFulfilled`函数都交由了`handle`函数处理。目前，我们仅需知道`handle`函数是属于调度中心的一部分，会根据本Promise的发布者发出的状态来处理相对应的回调函数(队列)。
+
+这一段应该是最好理解的了。那么接下来，我们从发布/订阅模式来看看then函数所处的位置和作用。
+
 ## 2.2 resolve-发布事件
 ## 2.3 Promise本体-调度中心
 ## 2.4 链式Promise
